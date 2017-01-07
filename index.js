@@ -2,11 +2,17 @@ var http = require( 'http' ) ,
     port = 8080;
 
 var server = http.createServer( function( req, res ) {
-	var ip = req.connection.remoteAddress ,
-	    lang = req.headers[ "accept-language" ] ,
-	    platform = req.headers[ "user-agent" ] ;
+	var ip = req.headers[ 'x-forwarded-for' ] ,
+	    lang = req.headers[ 'accept-language' ] ,
+	    platform = req.headers[ 'user-agent' ] ;
 
-	ip = ip.toString( ).replace( /[\s\S]+ffff:([\s\S]+)/ , "$1" ) ;
+	if(ip){ // ref: https://gist.github.com/qiao/1626318
+		// use the first listed ip
+		ip = ip.split(",")[0];
+	} else {
+		ip = req.connection.remoteAddress;
+	}
+
 	// Restrict languag to first description per fcc example.
 	lang = lang.split(",")[ 0 ] ;
 	// Restrict software to platform per fcc example.
